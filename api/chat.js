@@ -110,6 +110,30 @@ module.exports = async function handler(req, res) {
     });
   }
 
+  let actualModel = model;
+  if (upstream.status === 503 && model !== "gemini-3.6-flash") {
+    try {
+      const fallbackModel = "gemini-3.6-flash";
+      const fallbackResponse = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(fallbackModel) + ":generateContent",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
+          },
+          body: JSON.stringify(requestBody),
+          signal: AbortSignal.timeout(30000)
+        }
+      );
+      upstream = fallbackResponse;
+      actualModel = fallbackModel;
+      console.warn("ASTRA switched to fallback Gemini model after a 503 response.");
+    } catch (error) {
+      console.error("ASTRA fallback Gemini request failed:", error && error.name ? error.name : "UnknownError");
+    }
+  }
+
   const data = await upstream.json().catch(() => ({}));
   if (!upstream.ok) {
     const message = data && data.error && data.error.message ? String(data.error.message).slice(0, 240) : "Provider request failed.";
