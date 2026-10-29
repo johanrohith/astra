@@ -97,7 +97,17 @@ module.exports = async function handler(req, res) {
       }
     );
   } catch (error) {
-    return reply(res, 502, { error: "Astra could not reach the AI provider. Check the deployment network and try again." });
+    const errorName = error && typeof error.name === "string" ? error.name : "UnknownError";
+    const errorCode = error && error.cause && typeof error.cause.code === "string" ? error.cause.code : "";
+    console.error("ASTRA Gemini network request failed:", {
+      name: errorName,
+      code: errorCode || undefined,
+      message: error && typeof error.message === "string" ? error.message.slice(0, 240) : "No error message"
+    });
+    return reply(res, 502, {
+      error: "Astra could not reach the AI provider.",
+      diagnostic: errorCode || errorName
+    });
   }
 
   const data = await upstream.json().catch(() => ({}));
