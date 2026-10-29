@@ -117,7 +117,9 @@ module.exports = async function handler(req, res) {
     return reply(res, upstream.status === 429 ? 429 : 502, {
       error: upstream.status === 429
         ? "Astra has reached the AI provider's current rate limit. Try again shortly."
-        : "The AI provider rejected this request. Check your API key, model name and provider access."
+        : "The AI provider rejected this request.",
+      providerStatus: upstream.status,
+      diagnostic: message
     });
   }
 
