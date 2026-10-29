@@ -78,7 +78,7 @@ module.exports = async function handler(req, res) {
   const requestBody = {
     systemInstruction: { parts: [{ text: persona.join("\n\n") }] },
     contents: contents,
-    generationConfig: { maxOutputTokens: 2048, temperature: 0.7 }
+    generationConfig: { maxOutputTokens: 1024, thinkingConfig: { thinkingLevel: "low" } }
   };
   if (mode === "research") requestBody.tools = [{ google_search: {} }];
 
