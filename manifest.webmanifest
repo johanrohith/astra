@@ -1,0 +1,18 @@
+{
+  "name": "ASTRA — Personal Companion",
+  "short_name": "ASTRA",
+  "description": "A personal AI companion built to think alongside you.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07111d",
+  "theme_color": "#07111d",
+  "icons": [
+    {
+      "src": "assets/astra-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
