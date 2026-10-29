@@ -1,555 +1,224 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>A.S.T.R.A. Core</title>
-<style>
-:root{
-  --bg:#030912;--panel:rgba(5,18,30,.72);--line:#17485c;--cyan:#65e8ff;
-  --cyan2:#19b9e6;--text:#d8f8ff;--muted:#6793a3;--good:#58f0ae;--warn:#ffd166;
-}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
-body{overflow:hidden}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
- radial-gradient(circle at 50% 43%,rgba(16,154,202,.13),transparent 30%),
- radial-gradient(circle at 85% 15%,rgba(31,103,160,.08),transparent 30%),
- linear-gradient(rgba(80,180,210,.035) 1px,transparent 1px),
- linear-gradient(90deg,rgba(80,180,210,.035) 1px,transparent 1px);
- background-size:auto,auto,36px 36px,36px 36px}
-.shell{height:100%;max-width:1500px;margin:auto;padding:18px;display:grid;grid-template-rows:auto 1fr auto;gap:14px}
-header{display:flex;align-items:center;justify-content:space-between;padding:4px 8px 14px;border-bottom:1px solid rgba(101,232,255,.22)}
-.brand{display:flex;gap:12px;align-items:center}.mark{width:38px;height:38px;border:1px solid rgba(101,232,255,.35);border-radius:50%;display:block;background:radial-gradient(circle,rgba(101,232,255,.16),transparent 62%);box-shadow:0 0 20px rgba(25,185,230,.25);position:relative;overflow:hidden}
-.mark:before,.mark:after{content:"";position:absolute;left:50%;top:50%;background:rgba(101,232,255,.65);transform:translate(-50%,-50%);box-shadow:0 0 7px rgba(101,232,255,.5)}
-.mark:before{width:1px;height:70%}.mark:after{width:70%;height:1px}
-.brand b{letter-spacing:4px;font-size:15px}.brand span{display:block;color:var(--muted);font-size:10px;letter-spacing:2px;margin-top:3px}
-.status{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px;font-size:10px;letter-spacing:2px;color:var(--good);text-align:right}.status-line{display:flex;align-items:center;gap:8px}.dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 12px var(--good);animation:pulse 1.5s infinite}
-.main{min-height:0;display:grid;grid-template-columns:260px minmax(360px,1fr) 300px;gap:14px}
-.panel{background:linear-gradient(145deg,rgba(7,25,39,.78),rgba(2,11,20,.72));border:1px solid rgba(76,188,216,.2);border-radius:16px;box-shadow:inset 0 1px rgba(255,255,255,.025),0 18px 50px rgba(0,0,0,.25);backdrop-filter:blur(14px)}
-.side{padding:14px;display:flex;flex-direction:column;gap:12px}.label{font-size:9px;letter-spacing:2px;color:var(--muted);margin:3px 4px 7px}
-.nav{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid transparent;border-radius:10px;background:transparent;color:#9ec6d1;font-size:12px;cursor:pointer;text-align:left;transition:.2s}
-.nav:hover,.nav.active{background:rgba(39,170,207,.08);border-color:rgba(82,211,239,.22);color:var(--cyan);box-shadow:0 0 18px rgba(25,185,230,.06)}
-.nav i{font-style:normal;width:18px;text-align:center}.side-spacer{flex:1}
-.mini{padding:12px;border-top:1px solid rgba(101,232,255,.12);font-size:10px;color:var(--muted);line-height:1.8}
-.center{position:relative;overflow:hidden;display:flex;flex-direction:column}
-.core-area{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 48%,rgba(13,77,126,.16),transparent 48%),radial-gradient(circle at 15% 65%,rgba(0,80,145,.06),transparent 30%)}
- .core{width:min(42vw,330px);height:min(42vw,330px);position:relative;display:grid;place-items:center;margin:auto;flex:0 0 auto;filter:drop-shadow(0 0 18px rgba(38,170,255,.16));}
-.ring{position:absolute;border-radius:50%;border:1px solid rgba(101,232,255,.25)}
-.r1{inset:0;box-shadow:0 0 50px rgba(0,190,240,.07)}
-.r2{inset:24px;border-style:dashed;border-color:rgba(101,232,255,.3);animation:spin 25s linear infinite}
-.r3{inset:54px;border-color:rgba(101,232,255,.16);animation:spin 13s linear reverse infinite}
-.r2:before,.r2:after{content:"";position:absolute;width:7px;height:7px;background:var(--cyan);border-radius:50%;box-shadow:0 0 14px var(--cyan)}
-.r2:before{top:18px;left:50%}.r2:after{bottom:32px;right:17px}
-.core-orb{display:block;position:absolute;width:72px;height:72px;border-radius:50%;border:1px solid rgba(110,237,255,.35);background:radial-gradient(circle,rgba(82,222,255,.13),rgba(4,28,43,.28) 48%,transparent 72%);box-shadow:0 0 30px rgba(44,209,246,.18),inset 0 0 22px rgba(44,209,246,.12);animation:breathe 3s ease-in-out infinite}
-.core-orb:after{content:"";position:absolute;inset:19px;border-radius:50%;background:rgba(101,232,255,.13);box-shadow:0 0 20px rgba(101,232,255,.65);animation:corePulse 2.4s ease-in-out infinite}
-.core-lines{position:absolute;inset:0;pointer-events:none}
-.core-lines:before,.core-lines:after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:linear-gradient(90deg,transparent,rgba(101,232,255,.65),transparent);box-shadow:0 0 12px rgba(101,232,255,.35)}
-.core-lines:before{width:72%;height:1px}.core-lines:after{width:1px;height:72%;background:linear-gradient(180deg,transparent,rgba(101,232,255,.7),transparent)}
-.core-star{position:absolute;width:58px;height:58px;background:linear-gradient(135deg,#eaffff,#72e9ff 58%,#20b9e6);clip-path:polygon(50% 0,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0 50%,42% 42%);filter:drop-shadow(0 0 12px rgba(101,232,255,.95)) drop-shadow(0 0 28px rgba(25,185,230,.55));animation:starPulse 3.2s ease-in-out infinite;z-index:3}
-.core-star:after{content:"";position:absolute;inset:20px;background:#f4ffff;clip-path:inherit;filter:blur(1px)}
-.core-text{
-  display:flex;position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);
-  flex-direction:column;align-items:center;gap:3px;white-space:nowrap;
-  text-align:center;z-index:4;pointer-events:none;
-  text-shadow:0 0 10px rgba(101,232,255,.28)
-}
-.core-text b{font-size:11px;letter-spacing:2px;color:#d8fbff;font-weight:700}
-.core-text small{font-size:7px;letter-spacing:1.5px;color:#6faebb}
-.greeting{position:absolute;top:18px;left:20px;right:20px;text-align:center;color:#bfeaf2;font-size:13px;letter-spacing:.5px}
-.greeting strong{color:var(--cyan);font-weight:500}
-.bottom-bar{padding:13px 15px;border-top:1px solid rgba(101,232,255,.13);display:flex;gap:10px}
-input{flex:1;background:#04131e;border:1px solid #164456;color:var(--text);border-radius:10px;padding:12px 14px;outline:none;font:12px inherit}input:focus{border-color:#2dbedc;box-shadow:0 0 16px rgba(45,190,220,.08)}
-.send{border:1px solid #24768c;background:#08202d;color:var(--cyan);border-radius:10px;padding:0 18px;cursor:pointer}
-.right{padding:14px;display:flex;flex-direction:column;gap:12px;min-height:0}.metrics{display:grid;gap:12px}.metric{padding:12px;border-radius:10px;background:rgba(4,17,27,.62);border:1px solid rgba(76,188,216,.11)}.metric-top{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);letter-spacing:1px}.metric-top b{color:#d8f8ff;font-size:10px}.meter{height:4px;background:#0a202d;border-radius:5px;margin-top:9px;overflow:hidden}.meter span{display:block;height:100%;width:var(--w);background:linear-gradient(90deg,#1b91b5,var(--cyan));box-shadow:0 0 9px rgba(101,232,255,.45);transition:width .5s}
-.log-wrap{flex:1;min-height:0}.log{height:100%;overflow:auto;padding-right:4px}.log p{font-size:9px;color:#6f9dab;line-height:1.7;margin:0 0 6px}.log p b{color:#4dcde9;font-weight:500}.action{padding:12px;border:1px solid rgba(76,188,216,.14);background:rgba(4,17,27,.5);color:#9fd3de;border-radius:10px;cursor:pointer;text-align:left;font-size:10px}.action:hover{border-color:#2d7d91;color:var(--cyan)}
-footer{display:flex;justify-content:space-between;color:#3d6977;font-size:8px;letter-spacing:1.5px;padding:0 6px}
-.toast{position:fixed;right:22px;bottom:22px;background:#071c28;border:1px solid #21677c;color:var(--cyan);padding:12px 15px;border-radius:10px;font-size:11px;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none}.toast.show{opacity:1;transform:none}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes breathe{50%{transform:scale(1.05);box-shadow:0 0 45px rgba(44,209,246,.3),inset 0 0 35px rgba(44,209,246,.22)}}
-@keyframes starPulse{0%,100%{transform:scale(.94);filter:drop-shadow(0 0 9px rgba(101,232,255,.8)) drop-shadow(0 0 22px rgba(25,185,230,.4))}50%{transform:scale(1.08);filter:drop-shadow(0 0 15px rgba(220,255,255,1)) drop-shadow(0 0 34px rgba(25,185,230,.7))}}
-@keyframes corePulse{0%,100%{transform:scale(.8);opacity:.7}50%{transform:scale(1.15);opacity:1}}
-@keyframes pulse{50%{opacity:.35}}
-
-.response-panel{width:min(680px,92%);margin:0 auto 10px;max-height:150px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:4px 8px;scroll-behavior:smooth}
-.response{border-left:2px solid #2bbfdc;padding:8px 10px;background:rgba(4,20,30,.62);border-radius:0 9px 9px 0;font-size:11px;line-height:1.55;color:#b9e6ee}
-.response.user{border-left-color:#4b8ca0;color:#d7f4f8}
-
-@media(max-width:950px){body{overflow:auto}.shell{min-height:100vh;height:auto}.main{grid-template-columns:210px 1fr}.right{display:none}.core{width:300px;height:300px}}
-@media(max-width:650px){
-  html,body{width:100%;height:100%;overflow:hidden}
-
-  .shell{
-    width:100%;height:100dvh;min-height:0;
-    padding:7px;gap:7px;
-    display:grid;grid-template-rows:auto minmax(0,1fr)
-  }
-
-  header{padding:2px 5px 8px;min-height:49px}
-  .brand{min-width:0;gap:9px}
-  .brand b{font-size:13px;letter-spacing:3px}
-  .brand span{font-size:7px;letter-spacing:1.1px;white-space:nowrap}
-  .mark{width:30px;height:30px;flex:0 0 auto}
-  .status{font-size:7px;letter-spacing:1px;white-space:nowrap}
-  .status #clock{display:block}
-
-  .main{
-    display:flex;flex-direction:column;gap:7px;
-    min-height:0;height:100%;overflow:hidden
-  }
-
-  /* COMMAND DECK */
-  .side{
-    display:flex;flex:0 0 auto;height:52px;min-height:52px;
-    flex-direction:row;align-items:center;gap:5px;
-    padding:6px;overflow-x:auto;overflow-y:hidden;
-    border-radius:12px;scrollbar-width:none
-  }
-  .side::-webkit-scrollbar{display:none}
-  .side .label,.side .side-spacer,.side .mini{display:none}
-  .nav{
-    flex:0 0 auto;width:auto;margin:0;padding:9px 11px;
-    border-radius:8px;font-size:10px;white-space:nowrap
-  }
-  .nav i{width:auto}
-
-  /* LIVE TELEMETRY: only Processing / Memory / Network */
-  .right{
-    display:flex;flex:0 0 auto;height:66px;min-height:66px;
-    flex-direction:row;align-items:stretch;gap:6px;
-    padding:6px;overflow:hidden;border-radius:12px
-  }
-  .right>.label,
-  .right>.log,
-  .right>.log-wrap,
-  .right>.action,
-  .right>.quick-actions,
-  .right>.activity,
-  .right>button{display:none!important}
-  .metrics{
-    display:flex;gap:6px;flex:1 1 auto;width:100%;min-width:0
-  }
-  .metric{
-    min-width:0;width:auto;flex:1 1 0;
-    padding:9px;border-radius:8px
-  }
-  .metric-top{font-size:7px}.metric-top b{font-size:9px}
-  .meter{height:3px;margin-top:7px}
-
-  /*
-    MAIN HUD:
-    1. fixed core zone
-    2. ONLY chat scrolls
-    3. fixed basic commands
-    4. fixed input
-  */
-  .center{
-    order:3;width:100%;height:auto;min-height:0;flex:1;
-    display:grid;
-    grid-template-rows:190px minmax(0,1fr) auto auto;
-    overflow:hidden;border-radius:14px;position:relative
-  }
-
-  /* Core has breathing room at its bottom so the rings/glow end naturally,
-     rather than being sliced by the chat boundary. */
-  .core-area{
-    grid-row:1;
-    min-height:190px;height:190px;
-    overflow:hidden;position:relative;
-    display:block;padding:0;
-    background:
-      radial-gradient(circle at 50% 48%,rgba(17,105,170,.16),transparent 42%),
-      radial-gradient(circle at 82% 20%,rgba(23,90,150,.08),transparent 28%),
-      linear-gradient(180deg,rgba(2,10,19,.25),rgba(3,15,25,.82));
-  }
-
-  .greeting{
-    position:absolute;top:9px;left:10px;right:10px;
-    padding:0;font-size:11px;line-height:1.4;
-    text-align:center;white-space:nowrap;
-    overflow:hidden;text-overflow:ellipsis;z-index:5
-  }
-
-  .core{
-    position:absolute;
-    width:205px;height:205px;
-    left:50%;top:1px;
-    transform:translateX(-50%);
-    z-index:1;pointer-events:none;
-    filter:drop-shadow(0 0 14px rgba(38,170,255,.18));
-  }
-
-  /* ONLY this region scrolls */
-  .response-panel{
-    grid-row:2;
-    min-height:0;height:auto;
-    overflow-y:auto;overflow-x:hidden;
-    width:100%;margin:0;padding:9px 10px 10px;
-    display:flex;flex-direction:column;gap:7px;
-    z-index:3;-webkit-overflow-scrolling:touch;
-    scrollbar-width:thin
-  }
-  .response{
-    width:92%;font-size:11px;line-height:1.5;
-    padding:9px 10px;flex:0 0 auto
-  }
-  .response.user{
-    align-self:flex-end;width:88%;
-    border-left:0;border-right:2px solid #4b8ca0;
-    border-radius:8px 0 0 8px
-  }
-  .response:not(.user){align-self:flex-start}
-
-  /* Fixed command set: directly above textbox, never inside chat */
-  .basic-commands{
-    grid-row:3;
-    display:flex;flex:0 0 auto;
-    justify-content:center;
-    gap:5px;overflow-x:auto;scrollbar-width:none;
-    padding:6px 8px 5px;
-    background:rgba(3,13,22,.99);
-    border-top:1px solid rgba(101,232,255,.12);
-    position:relative;z-index:20
-  }
-  .basic-commands::-webkit-scrollbar{display:none}
-  .basic-commands button{
-    flex:0 0 auto;padding:7px 9px;
-    border:1px solid rgba(101,232,255,.25);
-    border-radius:7px;background:rgba(8,30,42,.9);
-    color:#9fdbe5;font:inherit;font-size:8px;
-    letter-spacing:1px;position:relative;z-index:21;
-    pointer-events:auto
-  }
-
-  /* Fixed input row at the very bottom */
-  .bottom-bar{
-    grid-row:4;
-    min-height:57px;height:57px;padding:7px;
-    display:flex;gap:6px;
-    background:rgba(3,13,22,.99);
-    position:relative;z-index:20
-  }
-  input{min-width:0;width:100%;font-size:11px;padding:10px 11px}
-  .send{flex:0 0 auto;padding:0 12px;font-size:9px;position:relative;z-index:21}
-
-  footer{display:none}
-}
-
-/* FINAL A.S.T.R.A. VISUAL TUNING */
-.mark{
-  width:38px;height:38px;flex:0 0 38px;
-  position:relative;display:block;overflow:visible;
-  border:0;background:transparent;box-shadow:none;
-}
-.mark:before{
-  content:"";position:absolute;
-  left:50%;top:50%;
-  width:26px;height:26px;
-  transform:translate(-50%,-50%);
-  background:linear-gradient(135deg,#f2ffff 0%,#72e9ff 55%,#20b9e6 100%);
-  clip-path:polygon(50% 0,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0 50%,42% 42%);
-  filter:drop-shadow(0 0 6px rgba(101,232,255,.95)) drop-shadow(0 0 13px rgba(25,185,230,.55));
-  animation:starPulse 3.2s ease-in-out infinite;
-}
-.mark:after{
-  content:"";position:absolute;
-  left:50%;top:50%;
-  width:38px;height:1px;
-  transform:translate(-50%,-50%);
-  background:linear-gradient(90deg,transparent,rgba(101,232,255,.55),transparent);
-  box-shadow:0 0 7px rgba(101,232,255,.28);
-  z-index:-1;
-}
-
-@media(max-width:650px){
-  .center{
-    grid-template-rows:218px minmax(0,1fr) 48px 57px !important;
-  }
-
-  .core-area{
-    grid-row:1 !important;
-    height:218px !important;
-    min-height:218px !important;
-    overflow:hidden;
-    position:relative;
-    display:block;
-    background:
-      radial-gradient(circle at 50% 56%,rgba(17,105,170,.15),transparent 45%),
-      linear-gradient(180deg,rgba(2,10,19,.12),rgba(3,15,25,.38));
-  }
-
-  .greeting{
-    top:9px !important;
-    left:10px !important;
-    right:10px !important;
-    z-index:8 !important;
-  }
-
-  .core{
-    width:170px !important;
-    height:170px !important;
-    left:50% !important;
-    top:25px !important;
-    transform:translateX(-50%) !important;
-    z-index:2 !important;
-  }
-
-  /* Soft visual disappearance at the bottom of the core zone. */
-  .core-area::after{
-    content:"";
-    position:absolute;
-    left:0;right:0;bottom:0;
-    height:92px;
-    pointer-events:none;
-    z-index:5;
-    background:linear-gradient(
-      to bottom,
-      rgba(3,15,25,0) 0%,
-      rgba(3,15,25,.035) 25%,
-      rgba(3,15,25,.16) 48%,
-      rgba(3,15,25,.52) 74%,
-      rgba(3,15,25,.99) 100%
-    );
-  }
-
-  .response-panel{
-    grid-row:2 !important;
-    width:100% !important;
-    height:auto !important;
-    min-height:0 !important;
-    max-height:none !important;
-    margin:0 !important;
-    padding:0 10px 10px !important;
-    overflow-y:auto !important;
-    overflow-x:hidden !important;
-    background:linear-gradient(
-      to bottom,
-      rgba(3,15,25,.72) 0,
-      rgba(3,15,25,.46) 16px,
-      rgba(3,15,25,.16) 34px,
-      rgba(3,15,25,0) 70px
-    ) !important;
-    position:relative;
-    z-index:6;
-  }
-
-  .basic-commands{
-    grid-row:3 !important;
-    min-height:48px !important;
-    max-height:48px !important;
-    height:48px !important;
-  }
-
-  .bottom-bar{
-    grid-row:4 !important;
-    min-height:57px !important;
-    max-height:57px !important;
-    height:57px !important;
-  }
-
-  .core-star{
-    width:48px !important;
-    height:48px !important;
-  }
-  .core-orb{width:62px !important;height:62px !important;}
-  .core-orb:after{inset:16px !important;}
-  .core-lines:before{width:76% !important;}
-  .core-lines:after{height:76% !important;}
-
-  .mark{
-    width:44px !important;
-    height:44px !important;
-    flex:0 0 44px !important;
-    align-self:center !important;
-    margin:0 !important;
-    position:relative !important;
-  }
-  .mark:before{
-    width:25px !important;height:25px !important;
-    left:50% !important;top:50% !important;
-    transform:translate(-50%,-50%) !important;
-  }
-  .mark:after{
-    width:44px !important;height:1px !important;
-    left:50% !important;top:50% !important;
-    transform:translate(-50%,-50%) !important;
-  }
-}
-
-/* v12.4 — compact mobile alignment */
-@media(max-width:650px){
-  header{
-    padding-left:4px !important;
-    padding-right:4px !important;
-  }
-  .brand{gap:7px !important;}
-  .brand b{font-size:12.5px !important;letter-spacing:2.8px !important;}
-  .brand span{font-size:6.6px !important;letter-spacing:1px !important;}
-  .mark{width:38px !important;height:38px !important;flex:0 0 38px !important;}
-  .mark:before{width:24px !important;height:24px !important;}
-  .mark:after{width:38px !important;}
-  .status{gap:3px !important;font-size:6.8px !important;letter-spacing:.9px !important;align-items:flex-end !important;text-align:right !important;}
-  .status-line{gap:6px !important;}
-  .status #clock{
-    display:block !important;
-    padding:0 !important;
-    margin:0 !important;
-    border:0 !important;
-    letter-spacing:1.2px !important;
-    font-size:7px !important;
-  }
-
-  /* Equal-width command cells: no stranded empty space. */
-  .side{
-    gap:4px !important;
-    padding:5px !important;
-  }
-  .side .nav{
-    flex:1 1 0 !important;
-    min-width:0 !important;
-    justify-content:center !important;
-    padding:9px 6px !important;
-    gap:7px !important;
-  }
-  .side .nav i{width:15px !important;}
-
-  /* Telemetry cards fill the entire bar evenly. */
-  .right{padding:5px !important;gap:5px !important;}
-  .metrics{gap:5px !important;width:100% !important;}
-  .metric{
-    flex:1 1 0 !important;
-    width:0 !important;
-    padding:8px 9px !important;
-  }
-  .metric-top{font-size:6.7px !important;letter-spacing:.8px !important;}
-  .metric-top b{font-size:8px !important;}
-}
-
-/* v12.5 — right-aligned clock stack */
-.status{
-  min-width:112px;
-  align-items:flex-end;
-  justify-content:center;
-}
-.status #clock{
-  order:0;
-  line-height:1;
-}
-.status-line{
-  order:1;
-  justify-content:flex-end;
-}
-@media(max-width:650px){
-  .status{min-width:86px !important;}
-  .status #clock{font-size:7px !important;}
-  .status-line{gap:5px !important;}
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07111d">
+  <meta name="description" content="ASTRA — a personal AI companion, built to think alongside you.">
+  <title>ASTRA — Your Personal Companion</title>
+  <link rel="icon" href="assets/astra-icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="shell">
-<header>
-  <div class="brand"><div class="mark" aria-label="A.S.T.R.A. core"></div><div><b>A.S.T.R.A.</b><span>ACTUALLY SMARTER THAN REGULAR ADULTS</span></div></div>
-  <div class="status"><span id="clock"></span><span class="status-line"><span class="dot"></span><span class="status-label">CORE ONLINE</span></span></div>
-</header>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+      <a class="brand" href="./" aria-label="ASTRA home">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span class="brand-copy"><strong>ASTRA</strong><small>PERSONAL INTELLIGENCE</small></span>
+      </a>
 
-<div class="main">
-  <aside class="panel side">
-    <div class="label">COMMAND DECK</div>
-    <button class="nav active" data-view="core"><i>◎</i> Core</button>
-    <button class="nav" data-view="research"><i>⌁</i> Research</button>
-        <button class="nav" data-view="data"><i>◇</i> Data</button>
-    <button class="nav" data-view="systems"><i>⚙</i> Systems</button>
-    <div class="side-spacer"></div>
-    <div class="mini">SECURITY<br><span style="color:var(--good)">● NOMINAL</span><br>LOCAL SESSION<br><span id="session">00:00:00</span></div>
-  </aside>
+      <button class="new-chat-btn" id="newChat" type="button">
+        <span class="plus-icon" aria-hidden="true">＋</span><span>New conversation</span>
+        <kbd>⌘ K</kbd>
+      </button>
 
-  <section class="panel center">
-    <div class="greeting" id="greeting">Good evening, Sir. <strong>A.S.T.R.A. is standing by.</strong></div><div id="responsePanel" class="response-panel"></div>
-    <div class="core-area">
-      <div class="core">
-        <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
-        <div class="core-orb"></div>
-        <div class="core-lines"></div>
-        <div class="core-star"></div>
-        <div class="core-text"><b id="viewTitle">A.S.T.R.A.</b><small id="viewSub">NEURAL CORE // READY</small></div>
+      <div class="nav-label">WORKSPACE</div>
+      <nav class="primary-nav">
+        <button class="nav-link active" type="button" data-view="core" aria-current="page">
+          <span class="nav-icon" aria-hidden="true">✳</span><span>Companion</span>
+        </button>
+        <button class="nav-link" type="button" data-view="research">
+          <span class="nav-icon" aria-hidden="true">⌕</span><span>Research</span><span class="nav-trailing">LIVE</span>
+        </button>
+        <button class="nav-link" type="button" data-view="data">
+          <span class="nav-icon" aria-hidden="true">◇</span><span>Memory &amp; notes</span>
+        </button>
+        <button class="nav-link" type="button" data-view="systems">
+          <span class="nav-icon" aria-hidden="true">⚙</span><span>Systems</span>
+        </button>
+      </nav>
+
+      <div class="history-heading"><span>RECENT CONVERSATIONS</span><span id="chatCount">0</span></div>
+      <div class="history-list" id="historyList" aria-label="Recent conversations"></div>
+
+      <div class="sidebar-bottom">
+        <div class="privacy-mini"><span class="privacy-dot"></span><span id="sidebarStatus">Local session ready</span></div>
+        <button class="settings-link" id="sidebarSettings" type="button">
+          <span class="nav-icon" aria-hidden="true">⚙</span><span>Preferences</span>
+        </button>
+        <div class="user-chip">
+          <div class="user-avatar" aria-hidden="true">J</div>
+          <div class="user-copy"><strong>My Astra</strong><small>Personal workspace</small></div>
+          <span class="user-more" aria-hidden="true">···</span>
+        </div>
       </div>
+    </aside>
+
+    <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Close navigation"></button>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Open navigation">☰</button>
+          <div class="breadcrumbs"><span>ASTRA</span><span class="crumb-sep">/</span><strong id="topTitle">Companion</strong></div>
+        </div>
+        <div class="topbar-actions">
+          <div class="connection-pill" id="connectionBadge"><span class="status-dot"></span><span id="connectionLabel">Ready</span></div>
+          <button class="icon-btn voice-output-btn" id="speakToggle" type="button" aria-label="Toggle spoken responses" title="Toggle spoken responses">◖))</button>
+          <button class="icon-btn" id="openSettings" type="button" aria-label="Open preferences" title="Preferences">⚙</button>
+        </div>
+      </header>
+
+      <section class="view chat-view" id="chatView" aria-labelledby="heroTitle">
+        <div class="conversation-shell">
+          <section class="companion-banner">
+            <div class="companion-orb" aria-hidden="true">
+              <div class="orb-ring ring-one"></div>
+              <div class="orb-ring ring-two"></div>
+              <div class="orb-ring ring-three"></div>
+              <div class="orb-core"><span></span></div>
+              <div class="orb-glint"></div>
+            </div>
+            <div class="companion-copy">
+              <div class="eyebrow"><span class="eyebrow-line"></span><span id="heroKicker">YOUR PERSONAL COMPANION</span></div>
+              <h1 id="heroTitle">I'm Astra<span class="title-period">.</span></h1>
+              <p id="heroSubtitle">A little imagination. A lot of intelligence. Always ready to think with you.</p>
+              <div class="mode-pill" id="modeChip"><span class="mode-dot"></span><span id="modeLabel">COMPANION MODE</span></div>
+            </div>
+          </section>
+
+          <div class="welcome" id="welcome">
+            <div class="welcome-topline"><span>START SOMEWHERE</span><span class="welcome-line"></span></div>
+            <div class="prompt-grid" id="promptGrid">
+              <button class="prompt-card" type="button" data-prompt="Help me plan my day around my priorities.">
+                <span class="prompt-icon">✧</span><span class="prompt-title">Plan my day</span><span class="prompt-desc">Turn a noisy to-do list into a clear next step.</span><span class="prompt-arrow">↗</span>
+              </button>
+              <button class="prompt-card" type="button" data-prompt="Help me understand a difficult concept step by step.">
+                <span class="prompt-icon">⌘</span><span class="prompt-title">Learn something</span><span class="prompt-desc">Make a difficult concept feel simple.</span><span class="prompt-arrow">↗</span>
+              </button>
+              <button class="prompt-card" type="button" data-prompt="Let's brainstorm an interesting project I could build.">
+                <span class="prompt-icon">✳</span><span class="prompt-title">Build an idea</span><span class="prompt-desc">Explore possibilities and make a real plan.</span><span class="prompt-arrow">↗</span>
+              </button>
+              <button class="prompt-card" type="button" data-prompt="Let's have a thoughtful conversation about something interesting.">
+                <span class="prompt-icon">☼</span><span class="prompt-title">Just talk</span><span class="prompt-desc">A conversation without needing a reason.</span><span class="prompt-arrow">↗</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="messages" id="messages" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions text"></div>
+          <div class="typing-indicator hidden" id="typingIndicator" aria-live="polite"><span class="typing-orb"></span><span>Astra is thinking</span><span class="typing-dots"><i></i><i></i><i></i></span></div>
+
+          <form class="composer" id="composer">
+            <label class="sr-only" for="messageInput">Message Astra</label>
+            <textarea id="messageInput" rows="1" placeholder="Talk to Astra..." autocomplete="off" maxlength="12000"></textarea>
+            <div class="composer-bottom">
+              <div class="composer-hints"><span class="composer-spark">✦</span><span>Curious minds welcome</span><span class="hint-divider">·</span><span>Shift + Enter for a new line</span></div>
+              <div class="composer-actions">
+                <button class="icon-btn mic-btn" id="micBtn" type="button" aria-label="Dictate a message" title="Dictate a message">♩</button>
+                <button class="send-btn" id="sendBtn" type="submit"><span>Send</span><span class="send-arrow" aria-hidden="true">↑</span></button>
+              </div>
+            </div>
+          </form>
+          <p class="chat-disclaimer">Astra can get things wrong. Verify important information. Messages sent to Astra are processed by the configured AI service.</p>
+        </div>
+      </section>
+
+      <section class="view module-view hidden" id="dataView" aria-labelledby="dataTitle">
+        <div class="module-header">
+          <div class="eyebrow"><span class="eyebrow-line"></span>YOUR SPACE</div>
+          <h1 id="dataTitle">Memory &amp; notes<span class="title-period">.</span></h1>
+          <p>Your context, under your control. Nothing is saved as memory unless you choose to save it.</p>
+        </div>
+        <div class="module-grid">
+          <section class="surface-card memory-card">
+            <div class="card-heading"><div><span class="card-kicker">PERSONAL CONTEXT</span><h2>What Astra should remember</h2></div><span class="card-symbol">◇</span></div>
+            <p class="card-help">Write preferences or ongoing context you want Astra to consider in future chats. This stays in this browser and is only sent with a request when enabled below.</p>
+            <label class="sr-only" for="memoryText">Personal memory</label>
+            <textarea class="memory-textarea" id="memoryText" rows="6" maxlength="5000" placeholder="Example: I prefer clear, practical explanations and I'm currently learning web development..."></textarea>
+            <div class="memory-controls"><label class="toggle-label"><input id="includeMemory" type="checkbox" checked><span class="toggle-ui"></span><span>Include saved memory in chats</span></label><span class="char-count" id="memoryCount">0 / 5000</span></div>
+            <div class="card-actions"><button class="primary-btn" id="saveMemory" type="button">Save memory</button><button class="text-btn danger-text" id="clearMemory" type="button">Delete memory</button></div>
+            <div class="inline-status" id="memoryStatus" aria-live="polite">Memory is stored locally in this browser.</div>
+          </section>
+
+          <section class="surface-card notes-card">
+            <div class="card-heading"><div><span class="card-kicker">QUICK CAPTURE</span><h2>Notes for later</h2></div><span class="card-symbol">⌁</span></div>
+            <p class="card-help">Keep ideas, reminders and small things you don't want to lose.</p>
+            <form class="note-form" id="noteForm"><label class="sr-only" for="noteInput">Write a note</label><textarea id="noteInput" rows="2" maxlength="2000" placeholder="Capture an idea..."></textarea><button class="primary-btn" type="submit">Add note <span>＋</span></button></form>
+            <div class="notes-list" id="notesList"></div>
+            <div class="empty-notes" id="emptyNotes">Your notes will appear here.</div>
+          </section>
+        </div>
+        <div class="module-footnote"><span class="privacy-dot"></span><span>Local-first storage · Review and delete your data whenever you like.</span></div>
+      </section>
+
+      <section class="view module-view hidden" id="systemsView" aria-labelledby="systemsTitle">
+        <div class="module-header">
+          <div class="eyebrow"><span class="eyebrow-line"></span>UNDER THE HOOD</div>
+          <h1 id="systemsTitle">Systems<span class="title-period">.</span></h1>
+          <p>Real status, clear boundaries. No simulated device telemetry.</p>
+        </div>
+        <div class="systems-grid">
+          <section class="surface-card">
+            <div class="card-heading"><div><span class="card-kicker">AI CONNECTION</span><h2>Intelligence link</h2></div><span class="card-symbol">⌘</span></div>
+            <div class="system-row"><span>API route</span><code>/api/chat</code></div>
+            <div class="system-row"><span>Connection</span><strong id="apiStatus" class="system-value">Not tested</strong></div>
+            <div class="system-row"><span>Last response</span><strong id="lastResponseStatus" class="system-value">—</strong></div>
+            <button class="secondary-btn full-width" id="testConnection" type="button">Test AI connection</button>
+            <p class="card-help compact-help">The backend must be deployed and configured with server-side credentials before AI chat can work.</p>
+          </section>
+          <section class="surface-card">
+            <div class="card-heading"><div><span class="card-kicker">THIS BROWSER</span><h2>Local systems</h2></div><span class="card-symbol">◉</span></div>
+            <div class="system-row"><span>Speech recognition</span><strong id="voiceStatus" class="system-value">Checking…</strong></div>
+            <div class="system-row"><span>Local storage</span><strong id="storageStatus" class="system-value">Available</strong></div>
+            <div class="system-row"><span>Saved conversations</span><strong id="systemChatCount" class="system-value">0</strong></div>
+            <div class="system-row"><span>Saved notes</span><strong id="systemNoteCount" class="system-value">0</strong></div>
+            <button class="secondary-btn full-width" id="exportData" type="button">Export my Astra data ↗</button>
+            <button class="text-btn danger-text" id="clearAllChats" type="button">Delete all conversations</button>
+          </section>
+        </div>
+        <div class="module-footnote"><span class="privacy-dot"></span><span>Device CPU, memory and network metrics are not read by this website.</span></div>
+      </section>
+    </main>
+
+    <aside class="info-rail" aria-label="Companion status">
+      <div class="rail-heading"><span>AT A GLANCE</span><span class="rail-heading-line"></span></div>
+      <section class="rail-card">
+        <div class="rail-card-top"><span class="rail-card-icon">✳</span><span class="live-label"><span class="status-dot"></span>STANDING BY</span></div>
+        <h2>Your companion.</h2>
+        <p>Thoughtful, curious, and ready when you are.</p>
+        <div class="rail-rule"></div>
+        <div class="rail-stat"><span>Current mode</span><strong id="railMode">Companion</strong></div>
+        <div class="rail-stat"><span>Session</span><strong id="sessionTime">00:00</strong></div>
+      </section>
+      <section class="rail-card quick-card">
+        <div class="rail-section-title">QUICK ACTIONS</div>
+        <button class="quick-action" type="button" data-quick="Help me choose the most useful next step for today."><span>◷</span><span>Plan my next step</span><span>↗</span></button>
+        <button class="quick-action" type="button" data-quick="Help me break this task into small, manageable steps."><span>▤</span><span>Break down a task</span><span>↗</span></button>
+        <button class="quick-action" type="button" data-quick="Ask me three good questions to understand what I'm trying to achieve."><span>✧</span><span>Think it through</span><span>↗</span></button>
+      </section>
+      <section class="rail-note">
+        <span class="rail-note-mark">✦</span>
+        <p><strong>A small reminder.</strong><br>Not every thought needs a solution. Sometimes we can just explore it.</p>
+      </section>
+      <div class="rail-footer"><span class="privacy-dot"></span><span>Private to this browser</span></div>
+    </aside>
+  </div>
+
+  <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
+    <form method="dialog" class="dialog-dismiss"><button class="icon-btn" aria-label="Close preferences" value="cancel">×</button></form>
+    <div class="dialog-heading"><div class="dialog-mark">✳</div><div><div class="card-kicker">MAKE IT YOURS</div><h2 id="settingsTitle">Preferences</h2><p>Choose how Astra connects and responds.</p></div></div>
+    <div class="settings-field">
+      <label for="accessToken">Private access token <span class="optional-label">optional for local development</span></label>
+      <input id="accessToken" type="password" autocomplete="off" placeholder="Enter your Astra access token">
+      <p>Only used to authenticate requests to your own Astra backend. Keep your AI provider key in Vercel environment variables, never here.</p>
     </div>
-    
-<div class="basic-commands" aria-label="Basic commands">
-  <button data-command="status">STATUS</button>
-  <button data-command="run diagnostics">DIAGNOSTICS</button>
-  <button data-command="research">RESEARCH</button>
-  <button data-command="data">DATA</button>
-</div>
-<div class="bottom-bar">
-      <input id="command" placeholder="Enter a command for A.S.T.R.A. …" autocomplete="off">
-      <button class="send" id="send">EXECUTE</button>
-    </div>
-  </section>
+    <label class="settings-check"><input id="speakResponses" type="checkbox"><span class="toggle-ui"></span><span><strong>Speak Astra's replies</strong><small>Uses your browser's built-in text-to-speech voice.</small></span></label>
+    <div class="dialog-actions"><button class="secondary-btn" type="button" id="closeSettings">Cancel</button><button class="primary-btn" type="button" id="saveSettings">Save preferences</button></div>
+    <p class="dialog-footnote">Your access token is kept for this browser session only.</p>
+  </dialog>
 
-  <aside class="panel right">
-    <div class="label">LIVE TELEMETRY</div>
-    <div class="metrics">
-      <div class="metric"><div class="metric-top"><span>PROCESSING</span><b id="cpuText">42%</b></div><div class="meter"><span id="cpu" style="--w:42%"></span></div></div>
-      <div class="metric"><div class="metric-top"><span>MEMORY</span><b id="memText">68%</b></div><div class="meter"><span id="mem" style="--w:68%"></span></div></div>
-      <div class="metric"><div class="metric-top"><span>NETWORK</span><b>OPTIMAL</b></div><div class="meter"><span style="--w:92%"></span></div></div>
-    </div>
-  </aside>
-</div>
-
-<footer><span>A.S.T.R.A. CORE // HUD PROTOTYPE</span><span>LOCAL INTERFACE • v12.5</span></footer>
-</div>
-<div class="toast" id="toast"></div>
-
-<script>
-const $=s=>document.querySelector(s);
-const log=null, toast=$('#toast');
-function addLog(text){ /* Activity log intentionally hidden from the HUD. */ }
-function notify(text){toast.textContent=text;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800)}
-function execute(command){
- if(!command.trim())return;
- const c=command.trim();
- const panel=$('#responsePanel');
- const u=document.createElement('div');u.className='response user';u.textContent=c;panel.appendChild(u);
- addLog('Command received: '+c);
- let reply='Command queued. A.S.T.R.A. is ready for backend integration.';
- if(/diagnos|diagnostic/i.test(c)) reply='Diagnostics complete. Core interface nominal.';
- else if(/status/i.test(c)) reply='All visible systems are nominal.';
- else if(/research|web|search/i.test(c)) reply='Research module selected. Connect your backend to enable live research.';
- else if(/data|library/i.test(c)) reply='Data library selected. Stored knowledge will appear here.';
- else if(/system|diagnostic|activity|log/i.test(c)) reply='Systems selected. Diagnostics and activity stream are ready.';
- const a=document.createElement('div');a.className='response';a.textContent=reply;panel.appendChild(a);
- panel.scrollTop=panel.scrollHeight;
- addLog(reply);notify(reply);
- $('#command').value='';
-}
-$('#send').onclick=()=>execute($('#command').value);
-$('#command').addEventListener('keydown',e=>{if(e.key==='Enter')execute(e.target.value)});
-document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>{
- document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));b.classList.add('active');
- const v=b.dataset.view;
- const names={core:['A.S.T.R.A.','NEURAL CORE // READY'],research:['RESEARCH','LIVE RESEARCH // READY'],data:['DATA','KNOWLEDGE LIBRARY // READY'],systems:['SYSTEMS','DIAGNOSTICS // ACTIVITY // LIVE']};
- if(names[v]){ $('#viewTitle').textContent=names[v][0];$('#viewSub').textContent=names[v][1]; }
- addLog(v.charAt(0).toUpperCase()+v.slice(1)+' module opened.');
-});
-document.querySelectorAll('.action').forEach(b=>b.onclick=()=>execute(b.dataset.action));
-let start=Date.now();
-setInterval(()=>{
- $('#clock').textContent=new Date().toLocaleTimeString([], {hour12:false});
- let s=Math.floor((Date.now()-start)/1000),h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor(s%3600/60)).padStart(2,'0'),sec=String(s%60).padStart(2,'0');$('#session').textContent=`${h}:${m}:${sec}`;
- let cpu=38+Math.floor(Math.random()*20),mem=62+Math.floor(Math.random()*12);
- $('#cpu').style.setProperty('--w',cpu+'%');$('#cpuText').textContent=cpu+'%';$('#mem').style.setProperty('--w',mem+'%');$('#memText').textContent=mem+'%';
-},1000);
-</script>
-
-<script>
-document.querySelectorAll('.basic-commands button[data-command]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const cmd=btn.dataset.command;
-    const input=document.querySelector('#command');
-    if(input){ input.value=cmd; execute(cmd); }
-  });
-});
-</script>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js" defer></script>
 </body>
 </html>
