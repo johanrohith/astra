@@ -359,7 +359,12 @@
       try { data = await response.json(); } catch (_) { data = {}; }
       if (!response.ok) {
         if (response.status === 401) throw new Error("Access denied. Check the private access token in Preferences.");
-        throw new Error(data.error || ("The AI service returned status " + response.status + "."));
+        const baseError = data.error || ("The AI service returned status " + response.status + ".");
+        const providerStatus = data.providerStatus ? " (Gemini HTTP " + data.providerStatus + ")" : "";
+        const diagnostic = typeof data.diagnostic === "string" && data.diagnostic
+          ? " Details: " + data.diagnostic
+          : "";
+        throw new Error(baseError + providerStatus + diagnostic);
       }
       if (typeof data.reply !== "string" || !data.reply.trim()) throw new Error("The AI service returned an empty response.");
       chat.messages.push({ role: "assistant", content: data.reply.trim(), sources: Array.isArray(data.sources) ? data.sources : [], createdAt: Date.now() });
