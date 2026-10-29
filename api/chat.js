@@ -83,6 +83,7 @@ module.exports = async function handler(req, res) {
   if (mode === "research") requestBody.tools = [{ google_search: {} }];
 
   let upstream;
+  let actualModel = model;
   try {
     upstream = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent",
@@ -93,7 +94,7 @@ module.exports = async function handler(req, res) {
           "x-goog-api-key": apiKey
         },
         body: JSON.stringify(requestBody),
-        signal: AbortSignal.timeout(45000)
+        signal: AbortSignal.timeout(25000)
       }
     );
   } catch (error) {
@@ -104,13 +105,38 @@ module.exports = async function handler(req, res) {
       code: errorCode || undefined,
       message: error && typeof error.message === "string" ? error.message.slice(0, 240) : "No error message"
     });
-    return reply(res, 502, {
-      error: "Astra could not reach the AI provider.",
-      diagnostic: errorCode || errorName
-    });
-  }
 
-  let actualModel = model;
+    if (model !== "gemini-3.6-flash") {
+      try {
+        actualModel = "gemini-3.6-flash";
+        upstream = await fetch(
+          "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(actualModel) + ":generateContent",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-goog-api-key": apiKey
+            },
+            body: JSON.stringify(requestBody),
+            signal: AbortSignal.timeout(25000)
+          }
+        );
+        console.warn("ASTRA switched to fallback Gemini model after a network timeout.");
+      } catch (fallbackError) {
+        const fallbackName = fallbackError && typeof fallbackError.name === "string" ? fallbackError.name : "UnknownError";
+        console.error("ASTRA fallback Gemini network request failed:", fallbackName);
+        return reply(res, 502, {
+          error: "Astra could not reach the AI provider.",
+          diagnostic: "Primary " + errorName + "; fallback " + fallbackName
+        });
+      }
+    } else {
+      return reply(res, 502, {
+        error: "Astra could not reach the AI provider.",
+        diagnostic: errorCode || errorName
+      });
+    }
+  }
   if (upstream.status === 503 && model !== "gemini-3.6-flash") {
     try {
       const fallbackModel = "gemini-3.6-flash";
